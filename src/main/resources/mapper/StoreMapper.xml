@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.warehouse_manager.mapper.StoreMapper">
+    <!--查询所有仓库的方法-->
+    <select id="findAllStore" resultType="store">
+        select * from store
+    </select>
+
+    <!--查询echarts所需的数据-->
+    <select id="findStoreCount" resultType="com.warehouse_manager.vo.StoreCountVo">
+        select t1.store_id,t1.store_name,ifnull(sum(product_invent),0) totalInvent
+        from store t1,product t2
+             where t1.store_id =t2.store_id
+        group by t1.store_id,t1.store_name
+    </select>
+
+    <select id="findStorePageCount" resultType="integer">
+        select count(*)
+        from store
+       <where>
+           <if test="storeName !=null and storeName != ''">
+               and store_name like concat('%',#{storeName},'%')
+           </if>
+           <if test="storeAddress != null and storeAddress != ''">
+               and store_address like concat('%',#{storeAddress},'%')
+           </if>
+           <if test="concat !=null and concat != ''" >
+               and concat like concat('%',#{concat},'%')
+           </if>
+           <if test="phone !=null and phone != ''">
+               and phone like concat('%',#{phone},'%')
+           </if>
+       </where>
+    </select>
+
+    <!--分页查询仓库的方法-->
+    <select id="selectStorePage" resultType="store">
+        select * from store
+        <where>
+            <if test="store.storeName !=null and store.storeName != ''">
+                and store_name like concat('%',#{store.storeName},'%')
+            </if>
+            <if test="store.storeAddress != null and store.storeAddress != ''">
+                and store_address like concat('%',#{store.storeAddress},'%')
+            </if>
+            <if test="store.concat !=null and store.concat != ''" >
+                and concat like concat('%',#{store.concat},'%')
+            </if>
+            <if test="store.phone !=null and store.phone != ''">
+                and phone like concat('%',#{store.phone},'%')
+            </if>
+        </where>
+        limit #{page.limitIndex},#{page.pageSize}
+    </select>
+
+    <!--添加仓库的方法-->
+    <insert id="insertStore">
+        insert into store values(
+                                 null,#{storeName},#{storeNum},
+                                 #{storeAddress},#{concat},#{phone}
+                                )
+    </insert>
+
+    <!--根据编码做查询-->
+    <select id="findStoreByCodeOrName" resultType="store">
+        select * from store
+        <where>
+            <if test="storeName!=null and storeName!= ''">
+                or store_name =#{storeName}
+            </if>
+            <if test="storeNum!=null and storeNum!= ''">
+                or store_num =#{storeNum}
+            </if>
+        </where>
+    </select>
+
+
+    <!--根据仓库id删除仓库-->
+    <delete id="deleteStoreById">
+        delete from store where store_id =#{storeId}
+    </delete>
+
+    <!--根据仓库id修改仓库-->
+    <update id="setStoreById">
+        update store set
+                         store_name=#{storeName},store_address=#{storeAddress},concat=#{concat},phone=#{concat}
+        where store_id=#{storeId}
+    </update>
+
+</mapper>
